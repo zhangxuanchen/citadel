@@ -1,0 +1,67 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: citadel-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-authz}
+      MYSQL_USER: ${MYSQL_USER:-authz}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: ${TZ:-UTC}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./deploy/mysql/schema-mysql.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: citadel:latest
+    container_name: citadel-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-authz}?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-authz}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_ISSUER: ${JWT_ISSUER:-citadel}
+      JWT_KEY_ID: ${JWT_KEY_ID:-authz-prod-key-1}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-2h}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-7d}
+      AUTHZ_RATE_LIMIT_ENABLED: ${AUTHZ_RATE_LIMIT_ENABLED:-true}
+      AUTHZ_RATE_LIMIT_MAX_REQUESTS: ${AUTHZ_RATE_LIMIT_MAX_REQUESTS:-120}
+      AUTHZ_RATE_LIMIT_WINDOW: ${AUTHZ_RATE_LIMIT_WINDOW:-1m}
+      AUTHZ_LOGIN_PROTECTION_ENABLED: ${AUTHZ_LOGIN_PROTECTION_ENABLED:-true}
+      AUTHZ_LOGIN_MAX_FAILURES: ${AUTHZ_LOGIN_MAX_FAILURES:-5}
+      AUTHZ_LOGIN_LOCK_DURATION: ${AUTHZ_LOGIN_LOCK_DURATION:-15m}
+      TZ: ${TZ:-UTC}
+    expose:
+      - "8080"
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: citadel-nginx
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    volumes:
+      - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+volumes:
+  mysql_data:

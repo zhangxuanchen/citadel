@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/authz?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${SPRING_DATASOURCE_USERNAME:authz}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  h2:
+    console:
+      enabled: false
+  sql:
+    init:
+      mode: never
+
+security:
+  jwt:
+    issuer: ${JWT_ISSUER:citadel}
+    key-id: ${JWT_KEY_ID:authz-prod-key-1}
+    private-key: ${JWT_PRIVATE_KEY}
+    public-key: ${JWT_PUBLIC_KEY}
+    expiration: ${JWT_EXPIRATION:2h}
+    refresh-expiration: ${JWT_REFRESH_EXPIRATION:7d}
+
+authz:
+  captcha:
+    return-code: false
+  security:
+    rate-limit:
+      enabled: ${AUTHZ_RATE_LIMIT_ENABLED:true}
+      max-requests: ${AUTHZ_RATE_LIMIT_MAX_REQUESTS:120}
+      window: ${AUTHZ_RATE_LIMIT_WINDOW:1m}
+    login-protection:
+      enabled: ${AUTHZ_LOGIN_PROTECTION_ENABLED:true}
+      max-failures: ${AUTHZ_LOGIN_MAX_FAILURES:5}
+      lock-duration: ${AUTHZ_LOGIN_LOCK_DURATION:15m}
+
+logging:
+  level:
+    root: info
+    "[cn.com.app.security]": info
+    "[org.springframework.security]": warn

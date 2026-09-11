@@ -1,0 +1,55 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: citadel
+  datasource:
+    url: jdbc:h2:mem:authz;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+security:
+  jwt:
+    issuer: citadel
+    key-id: authz-demo-key-1
+    # 注意：下面这对 RSA 密钥仅用于本地开发演示（默认 profile + H2 内存库），
+    # 严禁用于生产。私钥泄露即可被用于伪造 JWT 签名。
+    # 生产环境必须通过 JWT_PRIVATE_KEY / JWT_PUBLIC_KEY 环境变量注入
+    # deploy.sh 自动生成的密钥（参见 application-prod.yml）。
+    private-key: "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCl8BdrvUvBKFO1\nriKsScL3WPKLP6JdVLPbIp931EOW6vdfJAm4a4+TrKGw3jEFqoO5og+wvZZ/Yr++\n8qzc/SEvEGG6u8T77FGbcNPTR5GvkU5TywTQIXAt6p356TzQVjIDljPEmUc3JyIa\nKtXI+TDAZi41pJQGTYTn6ju0YBy+XOo90CVGY+LOH5qOWdg7S2pM6+0YY6g/GceJ\nen6Fm5Nw0hwl5DqBlqhzwClOnnIxGOzl76ZmBxubRJQRyN1wDhMMF0dOfX8U+wrh\nTLYjA4qCuFjuDJWUCYP2DMwhlQ08Heen3jFbMTe11EAai8cY+8NTsB8a6hNAob8b\nyMzHUmmtAgMBAAECggEABSw93qrxAJ18No6uIAbQoBtSvEqIijZIwQ0MQZUJYlwC\nyCF8eBZKTIU2KShUCOQu5QuLR6wxU9lFNvOjtePiM/Bjy4ls85mDVcAnqk9x2DJE\nadJLXR2dvKCyugauUaROPNRi2r8YfDypEH3DWleCUI0e5acywhuKiBxCLjZMzxZT\ngg+L+G9N++uEba1DIE2kp0jCtRbnGdOip13tKmqKle9+QsL0JPeV5jeycwcXZ1tL\n76k1AcxDfyyfv2diXQKvLhZFxRuw7bCaNZJsbr8VOCKGS0g+Mr6Z7KK9viDGP7hK\ns4O/lyKvf3b8LSIbKUT/uaRLzMerUQHbB4U4i7MT4QKBgQDi+SjiJ+k5GMi/pqSS\nUQ7a3lYwmuL0ULQRhHJLmJ9PfNjYN4RJfMdJ8aWiV5Rx/2S8kAXdNNv2iBMeCqSa\n9kfFz5j5FA4+O5NAk+PewwgCTGbS+JJFVRroziwanqHfwm7U+Hnrp/2tAvR0Dj8d\nzE2dk44y7tCJs+aQZx/pMVv5qQKBgQC7KLQKG2/1nZf4c/bVMbCZVxnPTg+HGwoN\nW4u0Er08gA5KyoKpusm/ROEtyBtdPYUpkwto1Mi+JNihARxE7q3X2nKLdITNJOX8\nZySsn9Lv8C3h9SjuAe7l7wfd4t6Uikgk4PTctUwFuvVlCCEEmbks0Asv0/NupkWk\nEfs061faZQKBgEHOTX0sZyEHv4RZU1OcrrrkRYb4ER8Wmu6NQPoL+Px5zQD7L56C\nz+Dvb79etwpKKrHE6/5TigazMx+9pDXNe8etRcPJfcurSCkr96ApWZQZBKLcMMRr\nRU8EH6NkJLiUTb/vfqHFZfYYajmPu9ru1f3+vvajaNDT2OA7FfRtPCZpAoGAQVWe\nNAEL/nP7PzJMMnRcL8tmKSYY6ZMY2Tzh8gSwptQVKSq0nkekce67pN28H7qAJ9k7\nHGdbhHUcYmge1Dl12mpZnjEYwvxkhM4E0XYhjr0LZ1vL4/osyXu+BUlTZgs30Bfv\norRvS3jOfWxvCkoXiHs/zHxy+Gd23CWiygB19LkCgYAIAjtR9toRY5qzWSlLVgu5\nh1SLwSz981BcRa+n2r5gGHddpbSD6p6VM6zg6nd9lkAbsXbTFSRBQKv3XNzUsPyh\nPvQ4AkAEs8WzSN0uNEYPD63LAR4Dco6CcgQOkFOWjuNMK2e908AbR4VjKEw1gsHb\nETl37s+dyxY/L0kdp0EXOw==\n-----END PRIVATE KEY-----\n"
+    public-key: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApfAXa71LwShTta4irEnC\n91jyiz+iXVSz2yKfd9RDlur3XyQJuGuPk6yhsN4xBaqDuaIPsL2Wf2K/vvKs3P0h\nLxBhurvE++xRm3DT00eRr5FOU8sE0CFwLeqd+ek80FYyA5YzxJlHNyciGirVyPkw\nwGYuNaSUBk2E5+o7tGAcvlzqPdAlRmPizh+ajlnYO0tqTOvtGGOoPxnHiXp+hZuT\ncNIcJeQ6gZaoc8ApTp5yMRjs5e+mZgcbm0SUEcjdcA4TDBdHTn1/FPsK4Uy2IwOK\ngrhY7gyVlAmD9gzMIZUNPB3np94xWzE3tdRAGovHGPvDU7AfGuoTQKG/G8jMx1Jp\nrQIDAQAB\n-----END PUBLIC KEY-----\n"
+    expiration: 2h
+    refresh-expiration: 7d
+
+authz:
+  security:
+    rate-limit:
+      enabled: true
+      max-requests: 120
+      window: 1m
+    login-protection:
+      enabled: true
+      max-failures: 5
+      lock-duration: 15m
+
+logging:
+  level:
+    root: info
+    "[cn.com.app.security]": info
+    "[org.springframework.security]": warn
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{requestId:-no-request}] [%thread] %logger{36} - %msg%n"

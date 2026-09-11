@@ -1,0 +1,25 @@
+# ---- Maven / Java 构建产物 ----
+target/
+*/target/
+*.class
+*.jar
+*.war
+
+# ---- IDE ----
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# ---- macOS ----
+.DS_Store
+
+# ---- 运行环境与敏感配置 ----
+.env
+.env.*
+deploy/online.env
+deploy/backups/
+
+# ---- 日志 ----
+*.log
