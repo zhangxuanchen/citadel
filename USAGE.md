@@ -401,15 +401,39 @@ Authorization: Bearer <accessToken>
 
 当前版本使用 RS256 非对称签名：Citadel 使用私钥签发 JWT，业务应用只配置公钥或 JWKS 地址验签，不需要也不应该持有私钥。
 
-### 8.1 本地安装 starter 包
+### 8.1 从 JitPack 引入 starter 包
 
-当前已经在本项目下新增了本地接入包：
+`authz-client-spring-boot-starter` 已发布到 JitPack（关联 GitHub 仓库 `zhangxuanchen/citadel`）。业务应用不需要本地安装，直接在 `pom.xml` 配置 JitPack 仓库并引入依赖即可：
 
-```text
-authz-client-spring-boot-starter
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+
+<dependency>
+    <groupId>com.github.zhangxuanchen</groupId>
+    <artifactId>citadel</artifactId>
+    <version>v1.0.1</version>
+</dependency>
 ```
 
-如果后续改了 starter 代码，需要重新安装到本机 Maven 仓库：
+> 版本号取 GitHub 的 release tag（如 `v1.0.1`）。发新版流程：改完 `authz-client-spring-boot-starter` 代码 → 提交推送 → 打新 tag 并推送（**不要复用已有 tag**，否则 JitPack 会命中旧构建缓存）。
+
+这个 starter 已经包含：
+
+| 能力 | 目的 |
+| --- | --- |
+| JWT 解析过滤器 | 从 `Authorization` 请求头读取并校验 JWT。 |
+| Spring Security 默认配置 | 默认所有接口都需要登录，除非配置了放行路径。 |
+| `@PreAuthorize` 支持 | 业务接口可以直接使用权限注解。 |
+| authorities 解析 | 自动读取 JWT 中的 `authorities` 字段并转换成 Spring Security 权限。 |
+
+### 8.2 本地开发安装（可选）
+
+只有在本地修改 starter 源码、想即时验证时才需要执行本地安装；正常接入业务应用直接用 8.1 的 JitPack 坐标即可：
 
 ```bash
 cd authz-client-spring-boot-starter
@@ -421,27 +445,6 @@ mvn clean install
 ```text
 ~/.m2/repository/cn/com/smart/ai/claw/authz-client-spring-boot-starter/1.0.0/
 ```
-
-### 8.2 业务应用引入依赖
-
-业务应用如果也是 Spring Boot，可以加入：
-
-```xml
-<dependency>
-    <groupId>cn.com.smart.ai.claw</groupId>
-    <artifactId>authz-client-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
-</dependency>
-```
-
-这个 starter 已经包含：
-
-| 能力 | 目的 |
-| --- | --- |
-| JWT 解析过滤器 | 从 `Authorization` 请求头读取并校验 JWT。 |
-| Spring Security 默认配置 | 默认所有接口都需要登录，除非配置了放行路径。 |
-| `@PreAuthorize` 支持 | 业务接口可以直接使用权限注解。 |
-| authorities 解析 | 自动读取 JWT 中的 `authorities` 字段并转换成 Spring Security 权限。 |
 
 ### 8.3 配置 JWT 参数
 
