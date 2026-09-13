@@ -1,6 +1,17 @@
 # JitPack 构建配置
 # 仓库根目录是 Citadel 主应用（服务），业务应用依赖的是子项目
 # authz-client-spring-boot-starter，因此只构建该子项目。
+#
+# JitPack 镜像自带 Maven 版本过旧（< 3.6.3），无法编译
+# Spring Boot 3.5.3 管理的 maven-compiler-plugin 3.14.0，
+# 因此显式下载 Maven 3.9.9 用于构建。
+jdk:
+  - openjdk17
+
+before_install:
+  - wget -q https://archive.apache.org/dist/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz
+  - tar -xzf apache-maven-3.9.9-bin.tar.gz
+
 install:
   - cd authz-client-spring-boot-starter
-  - mvn install -DskipTests
+  - ../apache-maven-3.9.9/bin/mvn install -DskipTests
