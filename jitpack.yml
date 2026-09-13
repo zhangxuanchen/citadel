@@ -1,0 +1,6 @@
+# JitPack 构建配置
+# 仓库根目录是 Citadel 主应用（服务），业务应用依赖的是子项目
+# authz-client-spring-boot-starter，因此只构建该子项目。
+install:
+  - cd authz-client-spring-boot-starter
+  - mvn install -DskipTests
