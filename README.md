@@ -172,45 +172,49 @@ mvn spring-boot:run
 
 ## 业务应用接入
 
-其他业务系统通过二方包 `authz-client-spring-boot-starter` 接入，接入后无需自己处理登录，只需校验 Citadel 签发的 JWT 并按权限控制接口。
+其他业务系统通过二方包 `authz-client-spring-boot-starter` 接入（已发布到 JitPack），接入后无需自己处理登录，只需校验 Citadel 签发的 JWT 并按权限控制接口。
 
-**1. 安装二方包**（本地 / 私服）：
-
-```bash
-cd authz-client-spring-boot-starter
-mvn install
-```
-
-**2. 引入依赖：**
+**1. 引入依赖**（在 `pom.xml` 配置 JitPack 仓库与坐标）：
 
 ```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+
 <dependency>
-    <groupId>cn.com.smart.ai.claw</groupId>
-    <artifactId>authz-client-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.github.zhangxuanchen</groupId>
+    <artifactId>citadel</artifactId>
+    <version>v1.0.1</version>
 </dependency>
 ```
 
-**3. 配置 JWT 校验参数：**
+**2. 配置 JWT 校验参数：**
 
 ```yaml
 authz:
   client:
-    issuer: citadel                 # 与授权中心 security.jwt.issuer 保持一致
-    jwks-uri: https://你的域名/api/auth/jwks   # 方式一：JWKS 自动拉取公钥
-    # public-key: ${AUTHZ_JWT_PUBLIC_KEY}     # 方式二：直接配置公钥（内网场景）
-    permit-paths:
+    issuer: citadel                 # 与授权中心 security.jwt.issuer 保持一致；授权中心未改则用默认值即可
+    jwks-uri: https://你的域名/api/auth/jwks   # 方式一：从授权中心 JWKS 自动拉取公钥（推荐，支持公钥轮换）
+    # public-key: ${AUTHZ_JWT_PUBLIC_KEY}     # 方式二：直接配置公钥 PEM（内网无法访问 JWKS 时）
+    permit-paths:                              # 无需登录即可访问的路径
       - /actuator/health
       - /api/public/**
 ```
 
-**4. 在业务接口上使用权限：**
+> `public-key` 与 `jwks-uri` **必须配置其一**，两个都未配置时业务应用启动会失败。`issuer` 默认 `citadel`，与授权中心默认配置一致，一般无需修改。
+
+**3. 在业务接口上使用权限：**
 
 ```java
 @PreAuthorize("hasAuthority('ORDER_READ')")
 @GetMapping("/orders")
 public List<Order> listOrders() { ... }
 ```
+
+**starter 自动完成的事**：开启方法级安全（`@EnableMethodSecurity`）、注册无状态 JWT 过滤器、按 `permit-paths` 放行白名单、其余接口全部要求认证。若业务应用已自定义了 `SecurityFilterChain`，starter 的过滤器链不会自动生效，需自行集成 `AuthzJwtAuthenticationFilter`。
 
 完整接入说明、starter 内部机制与联调验证见 [USAGE.md](USAGE.md#8-业务后端如何接入)。
 
